@@ -405,14 +405,14 @@ function lookKey(tier,weather){
 function figureHTML(r){
   if(USE_IMAGES){
     const k=lookKey(r.tier, state.weather);
-    return `<img class="kid" src="assets/${k}.png" alt="${r.name}">`;
+    return `<img class="kid" src="assets/${k}.webp" alt="${r.name}">`;
   }
   return fig(r.svg);
 }
 (function(){ const im=new Image();
   im.onload=()=>{USE_IMAGES=true; if(window.render)render();};
   im.onerror=()=>{USE_IMAGES=false; if(window.render)render();};
-  im.src='assets/look_summer.png'; })();
+  im.src='assets/look_summer.webp'; })();
 
 /* ---------- state + render ---------- */
 const state={ date:new Date(), weather:'cloudy', low:18, high:26, body:'normal', indoor:22, bag:true };
