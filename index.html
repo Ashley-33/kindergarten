@@ -50,6 +50,8 @@
   .daytoggle{display:inline-flex;background:#fff;border-radius:20px;box-shadow:var(--shadow);overflow:hidden;flex:none}
   .daytoggle button{border:none;background:transparent;color:var(--ink-soft);font-family:inherit;font-size:13px;padding:6px 14px;cursor:pointer;line-height:1.1}
   .daytoggle button.on{background:var(--blue);color:#fff}
+  .bodyrow{display:flex;align-items:center;justify-content:center;gap:8px;flex:none}
+  .bodyrow .bl{font-size:12.5px;color:var(--ink-soft)}
 
   /* collapsible edit sheet */
   .sheet{background:#fff;border-radius:18px;box-shadow:var(--shadow);display:none;flex:none}
@@ -115,7 +117,7 @@
 <div class="app">
 
   <div class="bar">
-    <div class="brand" id="brand">🧒 幼儿园穿什么</div>
+    <div class="brand" id="brand">幼儿园穿什么</div>
     <div class="acts">
       <button class="ico-btn" id="btnWeather" title="刷新定位/天气">🔄</button>
       <button class="ico-btn" id="btnShot" title="生成穿搭图卡">📸</button>
@@ -131,11 +133,6 @@
     <span class="chip"><span id="sWeatherEmo">⛅</span> <b id="sWeatherName">—</b></span>
     <span class="chip">🌡️ <b><span id="sLow">–</span>~<span id="sHigh">–</span>℃</b></span>
     <span class="chip alt" id="sVerdict">—</span>
-    <span class="daytoggle" id="bodyToggle">
-      <button data-b="cold">🥶 怕冷</button>
-      <button data-b="normal" class="on">😊 标准</button>
-      <button data-b="hot">🥵 怕热</button>
-    </span>
   </div>
 
   <div class="main">
@@ -146,6 +143,15 @@
       <div id="figure"></div>
     </div>
     <div class="outfit" id="outfit"></div>
+  </div>
+
+  <div class="bodyrow">
+    <span class="bl">👧 孩子体质</span>
+    <span class="daytoggle" id="bodyToggle">
+      <button data-b="cold">怕冷</button>
+      <button data-b="normal" class="on">标准</button>
+      <button data-b="hot">怕热</button>
+    </span>
   </div>
 
   <div class="tips-head">🔔 明日提醒</div>
@@ -467,7 +473,7 @@ state.day = (new Date().getHours()<14) ? 'today' : 'tomorrow';   // before 14:00
 function setDayUI(){
   document.querySelectorAll('#dayToggle button').forEach(b=>b.classList.toggle('on', b.dataset.d===state.day));
   const label = state.day==='today' ? '今天' : '明天';
-  document.getElementById('brand').textContent = `🧒 ${label}幼儿园穿什么`;
+  document.getElementById('brand').textContent = `${label}幼儿园穿什么`;
   document.title = `${label}幼儿园穿什么`;
 }
 function applyDay(){
