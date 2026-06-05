@@ -90,6 +90,9 @@
   #sky1{left:10px} #sky2{right:10px}
   .ground{position:absolute;left:0;right:0;bottom:0;height:40px;z-index:1;
     background:radial-gradient(120% 80% at 50% 100%,#bdebc6,transparent 70%)}
+  .verdict-badge{position:absolute;top:8px;left:8px;z-index:3;
+    background:var(--blue);color:#fff;font-size:12.5px;line-height:1.1;
+    padding:5px 11px;border-radius:15px;box-shadow:var(--shadow)}
   #figure{height:100%;width:100%;display:flex;align-items:flex-end;justify-content:center;position:relative;z-index:2;padding:5px}
   #figure img.kid{max-height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
   #figure svg{max-height:100%;width:auto;display:block}
@@ -141,11 +144,11 @@
     <button class="chip tap" id="dateChip" title="点击切换 今天/明天">📅 <b id="sDay">明天</b> <span id="sDate">—</span> <i id="sWeek"></i> <span class="swap">⇆</span></button>
     <span class="chip"><span id="sWeatherEmo">⛅</span> <b id="sWeatherName">—</b></span>
     <span class="chip">🌡️ <b><span id="sLow">–</span>~<span id="sHigh">–</span>℃</b></span>
-    <span class="chip alt" id="sVerdict">—</span>
   </div>
 
   <div class="main">
     <div class="stage">
+      <span class="verdict-badge" id="sVerdict">—</span>
       <div class="ground"></div>
       <div id="figure"></div>
     </div>
