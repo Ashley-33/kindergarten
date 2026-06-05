@@ -29,8 +29,9 @@
 
   /* top bar */
   .bar{display:flex;align-items:center;justify-content:space-between;flex:none}
-  .brand{font-size:20px;color:var(--blue-d);text-shadow:1px 2px 0 #fff;letter-spacing:0;white-space:nowrap}
+  .brand{font-size:19px;color:var(--blue-d);text-shadow:1px 2px 0 #fff;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bar{flex-wrap:nowrap}
+  .barL{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto}
   .acts{display:flex;gap:8px}
   .ico-btn{
     width:42px;height:42px;border-radius:14px;border:2px solid #fff;background:#fff;
@@ -53,11 +54,10 @@
   .chip.tap{border:none;font-family:inherit;cursor:pointer}
   .chip.tap:active{transform:scale(.97)}
   .chip .swap{color:var(--chip);font-size:12px;margin-left:1px}
-  /* 体质下拉：放在小人卡片左上角 */
-  .bodysel{position:absolute;top:8px;left:8px;z-index:3;
-    font-family:inherit;font-size:12.5px;color:var(--ink);
-    background:rgba(255,255,255,.9);border:1.5px solid var(--line);border-radius:13px;
-    padding:5px 6px;box-shadow:var(--shadow);max-width:46%}
+  /* 体质下拉：标题旁边 */
+  .bodysel{flex:none;font-family:inherit;font-size:12.5px;color:var(--ink);
+    background:#fff;border:2px solid var(--line);border-radius:13px;
+    padding:6px 4px;box-shadow:var(--shadow);max-width:92px}
 
   /* collapsible edit sheet */
   .sheet{background:#fff;border-radius:18px;box-shadow:var(--shadow);display:none;flex:none}
@@ -123,7 +123,14 @@
 <div class="app">
 
   <div class="bar">
-    <div class="brand" id="brand">幼儿园穿什么</div>
+    <div class="barL">
+      <div class="brand" id="brand">幼儿园穿什么</div>
+      <select class="bodysel" id="bodySelect" aria-label="孩子体质">
+        <option value="cold">🥶 怕冷</option>
+        <option value="normal" selected>😊 标准</option>
+        <option value="hot">🥵 怕热</option>
+      </select>
+    </div>
     <div class="acts">
       <button class="ico-btn" id="btnWeather" title="重新定位">🔄</button>
       <button class="ico-btn" id="btnShot" title="生成穿搭图卡">📸</button>
@@ -139,11 +146,6 @@
 
   <div class="main">
     <div class="stage">
-      <select class="bodysel" id="bodySelect" aria-label="孩子体质">
-        <option value="cold">🥶 怕冷</option>
-        <option value="normal" selected>😊 标准</option>
-        <option value="hot">🥵 怕热</option>
-      </select>
       <div class="ground"></div>
       <div id="figure"></div>
     </div>
