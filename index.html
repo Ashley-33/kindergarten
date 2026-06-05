@@ -50,8 +50,14 @@
   .daytoggle{display:inline-flex;background:#fff;border-radius:20px;box-shadow:var(--shadow);overflow:hidden;flex:none}
   .daytoggle button{border:none;background:transparent;color:var(--ink-soft);font-family:inherit;font-size:13px;padding:6px 14px;cursor:pointer;line-height:1.1}
   .daytoggle button.on{background:var(--blue);color:#fff}
-  .bodyrow{display:flex;align-items:center;justify-content:center;gap:8px;flex:none}
-  .bodyrow .bl{font-size:12.5px;color:var(--ink-soft)}
+  .chip.tap{border:none;font-family:inherit;cursor:pointer}
+  .chip.tap:active{transform:scale(.97)}
+  .chip .swap{color:var(--chip);font-size:12px;margin-left:1px}
+  /* 体质下拉：放在小人卡片左上角 */
+  .bodysel{position:absolute;top:8px;left:8px;z-index:3;
+    font-family:inherit;font-size:12.5px;color:var(--ink);
+    background:rgba(255,255,255,.9);border:1.5px solid var(--line);border-radius:13px;
+    padding:5px 6px;box-shadow:var(--shadow);max-width:46%}
 
   /* collapsible edit sheet */
   .sheet{background:#fff;border-radius:18px;box-shadow:var(--shadow);display:none;flex:none}
@@ -119,17 +125,13 @@
   <div class="bar">
     <div class="brand" id="brand">幼儿园穿什么</div>
     <div class="acts">
-      <button class="ico-btn" id="btnWeather" title="刷新定位/天气">🔄</button>
+      <button class="ico-btn" id="btnWeather" title="重新定位">🔄</button>
       <button class="ico-btn" id="btnShot" title="生成穿搭图卡">📸</button>
     </div>
   </div>
 
   <div class="chips">
-    <span class="daytoggle" id="dayToggle">
-      <button data-d="today">今天</button>
-      <button data-d="tomorrow">明天</button>
-    </span>
-    <span class="chip">📅 <b id="sDate">—</b> <i id="sWeek"></i></span>
+    <button class="chip tap" id="dateChip" title="点击切换 今天/明天">📅 <b id="sDay">明天</b> <span id="sDate">—</span> <i id="sWeek"></i> <span class="swap">⇆</span></button>
     <span class="chip"><span id="sWeatherEmo">⛅</span> <b id="sWeatherName">—</b></span>
     <span class="chip">🌡️ <b><span id="sLow">–</span>~<span id="sHigh">–</span>℃</b></span>
     <span class="chip alt" id="sVerdict">—</span>
@@ -137,21 +139,15 @@
 
   <div class="main">
     <div class="stage">
-      <span class="sky" id="sky1">☁️</span>
-      <span class="sky" id="sky2">🌤️</span>
+      <select class="bodysel" id="bodySelect" aria-label="孩子体质">
+        <option value="cold">🥶 怕冷</option>
+        <option value="normal" selected>😊 标准</option>
+        <option value="hot">🥵 怕热</option>
+      </select>
       <div class="ground"></div>
       <div id="figure"></div>
     </div>
     <div class="outfit" id="outfit"></div>
-  </div>
-
-  <div class="bodyrow">
-    <span class="bl">👧 孩子体质</span>
-    <span class="daytoggle" id="bodyToggle">
-      <button data-b="cold">怕冷</button>
-      <button data-b="normal" class="on">标准</button>
-      <button data-b="hot">怕热</button>
-    </span>
   </div>
 
   <div class="tips-head">🔔 明日提醒</div>
@@ -440,8 +436,6 @@ function render(){
   document.getElementById('sVerdict').textContent=r.name;
 
   document.getElementById('figure').innerHTML=figureHTML(r);
-  document.getElementById('sky1').textContent = (state.weather==='snow')?'❄️':(state.weather==='rain'||state.weather==='thunder')?'🌧️':'☁️';
-  document.getElementById('sky2').textContent = (state.weather==='sunny')?'☀️':(state.weather==='snow')?'☃️':'🌤️';
 
   const top=r.topList.map(x=>`${x.k}：${x.v}`).join('<br>');
   let oh='';
@@ -459,22 +453,19 @@ function render(){
 /* ---------- wiring ---------- */
 state.date=new Date();   // fallback until forecast loads
 
-// 体质（怕冷 / 标准 / 怕热）常驻切换
-document.querySelectorAll('#bodyToggle button').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('#bodyToggle button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); state.body=b.dataset.b; render();
-  };
-});
+// 体质下拉（图角）
+const bodySel=document.getElementById('bodySelect');
+bodySel.value=state.body;
+bodySel.onchange=function(){ state.body=this.value; render(); };
 
 /* ---------- today / tomorrow ---------- */
 let DAYS=[null,null];                 // [today, tomorrow] from forecast
 state.day = (new Date().getHours()<14) ? 'today' : 'tomorrow';   // before 14:00 → today
 function setDayUI(){
-  document.querySelectorAll('#dayToggle button').forEach(b=>b.classList.toggle('on', b.dataset.d===state.day));
   const label = state.day==='today' ? '今天' : '明天';
   document.getElementById('brand').textContent = `${label}幼儿园穿什么`;
   document.title = `${label}幼儿园穿什么`;
+  const sd=document.getElementById('sDay'); if(sd) sd.textContent=label;
 }
 function applyDay(){
   setDayUI();
@@ -483,7 +474,7 @@ function applyDay(){
   state.high=dd.hi; state.low=dd.lo; state.weather=dd.w; state.date=dd.date;
   render();
 }
-document.querySelectorAll('#dayToggle button').forEach(b=>{ b.onclick=()=>{ state.day=b.dataset.d; applyDay(); }; });
+document.getElementById('dateChip').onclick=()=>{ state.day = state.day==='today'?'tomorrow':'today'; applyDay(); };
 setDayUI();
 
 
@@ -525,19 +516,34 @@ async function fetchWeatherAt(lat,lon,name){
   const dd=DAYS[state.day==='today'?0:1];
   document.getElementById('wStatus').textContent=`✅ ${name} ${dd.date.getMonth()+1}月${dd.date.getDate()}日 实时预报`;
 }
-async function loadWeather(){
+// 位置缓存（localStorage）
+const LOC_KEY='kg_loc';
+function getCachedLoc(){ try{ return JSON.parse(localStorage.getItem(LOC_KEY)||'null'); }catch(e){ return null; } }
+function setCachedLoc(o){ try{ localStorage.setItem(LOC_KEY, JSON.stringify(o)); }catch(e){} }
+
+// 初始：有缓存用缓存，否则北京（不弹定位）
+async function initWeather(){
+  const loc = getCachedLoc() || {lat:BEIJING.lat, lon:BEIJING.lon, name:'北京'};
+  try{ await fetchWeatherAt(loc.lat, loc.lon, loc.name); }
+  catch(e){ document.getElementById('wStatus').textContent='⚠️ 天气获取失败，点 🔄 重试'; }
+}
+// 🔄 重新定位（请求一次定位，成功则缓存并使用）
+async function relocate(){
   const st=document.getElementById('wStatus');
   st.textContent='⏳ 正在定位…';
-  let c=null;
-  try{ c=await getCoords(); }catch(e){}
+  const c=await getCoords();
   if(c){
-    try{ await fetchWeatherAt(c.lat,c.lon,'📍当前位置'); return; }catch(e){}
+    const loc={lat:c.lat, lon:c.lon, name:'📍我的位置'};
+    setCachedLoc(loc);
+    try{ await fetchWeatherAt(loc.lat, loc.lon, loc.name); return; }
+    catch(e){ st.textContent='⚠️ 天气获取失败，请检查网络'; return; }
   }
-  // 定位失败 / 被拒绝 → 回退北京
-  try{ await fetchWeatherAt(BEIJING.lat,BEIJING.lon,'北京（未定位）'); }
-  catch(e){ st.textContent='⚠️ 天气获取失败，请检查网络后点 🔄 重试'; }
+  // 定位失败/被拒 → 回退（有缓存用缓存，否则北京）
+  const loc = getCachedLoc() || {lat:BEIJING.lat, lon:BEIJING.lon, name:'北京'};
+  try{ await fetchWeatherAt(loc.lat, loc.lon, loc.name); st.textContent='📍 未获取到定位，已用'+loc.name; }
+  catch(e){ st.textContent='⚠️ 天气获取失败，请检查网络'; }
 }
-document.getElementById('btnWeather').onclick=loadWeather;
+document.getElementById('btnWeather').onclick=relocate;
 
 /* ---------- share-card screenshot ---------- */
 function buildPoster(r){
@@ -595,7 +601,7 @@ async function makeShot(){
 document.getElementById('btnShot').onclick=makeShot;
 
 render();
-loadWeather();
+initWeather();
 </script>
 </body>
 </html>
