@@ -47,10 +47,12 @@
   .ico-btn.on{background:var(--blue);border-color:var(--blue)}
 
   /* chips */
-  .chips{display:flex;flex-wrap:wrap;gap:7px;flex:none}
+  .chips{display:flex;flex-wrap:nowrap;gap:6px;flex:none;overflow-x:auto;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
   .chip{
-    background:#fff;border-radius:20px;padding:6px 12px;font-size:13px;color:var(--ink);
-    box-shadow:var(--shadow);display:flex;align-items:center;gap:5px;line-height:1.1;
+    background:#fff;border-radius:20px;padding:6px 10px;font-size:13px;color:var(--ink);
+    box-shadow:var(--shadow);display:flex;align-items:center;gap:4px;line-height:1.1;
+    flex:none;white-space:nowrap;
   }
   .chip b{color:var(--blue-d)} .chip i{color:var(--ink-soft);font-style:normal;font-size:12px}
   .chip.alt{background:var(--blue);color:#fff}
@@ -160,7 +162,7 @@
     </select>
     <button class="chip tap" id="dateChip" title="点击切换 今天/明天">📅 <span id="sDate">—</span> <i id="sWeek"></i> <span class="swap">⇆</span></button>
     <span class="chip"><span id="sWeatherEmo">⛅</span> <b id="sWeatherName">—</b></span>
-    <span class="chip">🌡️ <b><span id="sLow">–</span>~<span id="sHigh">–</span>℃</b></span>
+    <span class="chip"><b><span id="sLow">–</span>~<span id="sHigh">–</span>℃</b></span>
   </div>
 
   <div class="main">
