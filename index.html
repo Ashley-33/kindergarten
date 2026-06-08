@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#bfe4fe">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="穿什么">
 <title>幼儿园穿什么</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -525,6 +531,7 @@ async function fetchWeatherAt(lat,lon,name){
   };
   DAYS[0]=mk(0); DAYS[1]=mk(1);
   applyDay();
+  setCachedDays(name);
   const dd=DAYS[state.day==='today'?0:1];
   document.getElementById('wStatus').textContent=`✅ ${name} ${dd.date.getMonth()+1}月${dd.date.getDate()}日 实时预报`;
 }
@@ -532,12 +539,21 @@ async function fetchWeatherAt(lat,lon,name){
 const LOC_KEY='kg_loc';
 function getCachedLoc(){ try{ return JSON.parse(localStorage.getItem(LOC_KEY)||'null'); }catch(e){ return null; } }
 function setCachedLoc(o){ try{ localStorage.setItem(LOC_KEY, JSON.stringify(o)); }catch(e){} }
+// 缓存上次天气数据，离线时仍能显示
+const DAYS_KEY='kg_days';
+function setCachedDays(name){ try{ localStorage.setItem(DAYS_KEY, JSON.stringify({name, days:DAYS.map(d=>({hi:d.hi,lo:d.lo,w:d.w,dateStr:d.dateStr}))})); }catch(e){} }
+function getCachedDays(){ try{ const o=JSON.parse(localStorage.getItem(DAYS_KEY)||'null'); if(!o)return null; o.days=o.days.map(d=>({...d,date:new Date(d.dateStr+'T00:00:00')})); return o; }catch(e){ return null; } }
 
 // 初始：有缓存用缓存，否则北京（不弹定位）
 async function initWeather(){
   const loc = getCachedLoc() || {lat:BEIJING.lat, lon:BEIJING.lon, name:'北京'};
   try{ await fetchWeatherAt(loc.lat, loc.lon, loc.name); }
-  catch(e){ document.getElementById('wStatus').textContent='⚠️ 天气获取失败，点 🔄 重试'; }
+  catch(e){
+    // 离线：用上次缓存的天气数据继续显示
+    const cd=getCachedDays();
+    if(cd){ DAYS=cd.days; applyDay(); document.getElementById('wStatus').textContent='📦 离线 · 显示上次数据（'+cd.name+'）'; }
+    else{ document.getElementById('wStatus').textContent='⚠️ 天气获取失败，点 🔄 重试'; }
+  }
 }
 // 🔄 重新定位（请求一次定位，成功则缓存并使用）
 async function relocate(){
@@ -622,6 +638,11 @@ document.getElementById('btnShot').onclick=makeShot;
   if(img && !img.complete){ await new Promise(res=>{ img.onload=img.onerror=res; setTimeout(res,3000); }); }
   document.getElementById('loading').classList.add('hide');
 })();
+
+// 注册 Service Worker（PWA：可添加到主屏幕、离线可看上次内容）
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
 </script>
 </body>
 </html>

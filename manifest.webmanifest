@@ -1,0 +1,15 @@
+{
+  "name": "幼儿园穿什么",
+  "short_name": "穿什么",
+  "description": "按天气给幼儿园孩子的每日穿搭建议",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#bfe4fe",
+  "theme_color": "#bfe4fe",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
