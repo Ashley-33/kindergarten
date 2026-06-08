@@ -40,11 +40,11 @@
   .barL{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto}
   .acts{display:flex;gap:8px}
   .ico-btn{
-    width:42px;height:42px;border-radius:14px;border:2px solid #fff;background:#fff;
-    box-shadow:var(--shadow);font-size:18px;cursor:pointer;transition:.15s;line-height:1;
+    width:40px;height:40px;border:none;background:transparent;box-shadow:none;padding:0;
+    font-size:21px;cursor:pointer;transition:.15s;line-height:1;opacity:.85;
   }
-  .ico-btn:active{transform:scale(.94)}
-  .ico-btn.on{background:var(--blue);border-color:var(--blue)}
+  .ico-btn:active{transform:scale(.88)}
+  .ico-btn:hover{opacity:1}
 
   /* chips */
   .chips{display:flex;flex-wrap:nowrap;gap:6px;flex:none;overflow-x:auto;scrollbar-width:none}
@@ -62,10 +62,13 @@
   .chip.tap{border:none;font-family:inherit;cursor:pointer}
   .chip.tap:active{transform:scale(.97)}
   .chip .swap{color:var(--chip);font-size:12px;margin-left:1px}
-  /* 体质下拉：标题旁边 */
-  .bodysel{flex:none;font-family:inherit;font-size:12.5px;color:var(--ink);
-    background:#fff;border:2px solid var(--line);border-radius:13px;
-    padding:6px 4px;box-shadow:var(--shadow);max-width:92px}
+  /* 体质下拉：圆角胶囊，和其它 chip 统一 */
+  .bodysel{flex:none;-webkit-appearance:none;appearance:none;
+    font-family:inherit;font-size:13px;color:var(--ink);line-height:1.1;
+    background-color:#fff;border:none;border-radius:20px;
+    padding:6px 24px 6px 11px;box-shadow:var(--shadow);
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="%234aa3e0" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>');
+    background-repeat:no-repeat;background-position:right 9px center;background-size:10px 6px}
 
   /* collapsible edit sheet */
   .sheet{background:#fff;border-radius:18px;box-shadow:var(--shadow);display:none;flex:none}
