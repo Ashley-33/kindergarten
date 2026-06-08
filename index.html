@@ -202,7 +202,7 @@ function tierOf(high){
   if(high>=0)  return 6;
   return 7;
 }
-const TIERNAME=['盛夏炎热','温暖舒适','春日舒适','凉爽','春寒/初秋','初冬微凉','寒冬','极寒'];
+const TIERNAME=['炎热','温暖','舒适','凉爽','微凉','较冷','寒冷','严寒'];
 
 function recommend(s){
   const {high,low,weather,body,indoor}=s;
@@ -226,7 +226,7 @@ function recommend(s){
 
   let coat, coatSvg, hood=false;
   if(t===0){coat='轻薄防晒衣';coatSvg='sun';}
-  else if(t<=3){coat='春夹克 / 风衣 / 牛仔外套';coatSvg='thin';}
+  else if(t<=3){coat='薄夹克 / 风衣 / 牛仔外套';coatSvg='thin';}
   else if(t===4){coat='30g 羽绒 / 加绒冲锋衣';coatSvg='downL';}
   else if(t===5){coat='中厚羽绒服（充绒 90g）';coatSvg='downM';}
   else if(t===6){coat='厚羽绒服（充绒 100~110g）';coatSvg='downH';}
@@ -242,7 +242,7 @@ function recommend(s){
   else {pants='德绒秋裤 + 加绒卫裤';pantsSvg='thick';}
 
   let shoes, shoesSvg;
-  if(t===0){shoes='网眼袜 + 透气夏款运动鞋';shoesSvg='mesh';}
+  if(t===0){shoes='网眼袜 + 透气网面运动鞋';shoesSvg='mesh';}
   else if(t<=4){shoes='薄棉袜 + 运动鞋';shoesSvg='sport';}
   else if(t===5){shoes='厚袜 + 防滑运动鞋';shoesSvg='winter';}
   else {shoes='纯棉厚袜 + 防滑保暖鞋';shoesSvg='winter';}
