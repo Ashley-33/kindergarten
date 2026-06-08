@@ -1,5 +1,5 @@
 // 幼儿园穿什么 · Service Worker
-const CACHE = 'kg-v5';
+const CACHE = 'kg-v6';
 // 这些跨域资源也做缓存（字体/截图库）→ 重复打开/离线更快
 const RUNTIME_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com'];
 const ASSETS = [
