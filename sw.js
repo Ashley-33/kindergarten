@@ -1,5 +1,5 @@
 // 幼儿园穿什么 · Service Worker
-const CACHE = 'kg-v2';
+const CACHE = 'kg-v3';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-180.png',
