@@ -119,10 +119,17 @@
   .wstatus{flex:none;font-size:12px;color:#2f6a96;text-align:center;min-height:14px}
   [hidden]{display:none!important}
 
+  #loading{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    background:linear-gradient(160deg,#bfe4fe 0%,#e3f4ff 40%,#eef9ff 100%);transition:opacity .35s ease}
+  #loading.hide{opacity:0;pointer-events:none}
+  #loading .spin{width:40px;height:40px;border-radius:50%;border:4px solid #cfe6fb;border-top-color:var(--blue);animation:kgspin .8s linear infinite}
+  #loading .lt{color:var(--blue-d);font-size:15px}
+  @keyframes kgspin{to{transform:rotate(360deg)}}
   #poster{position:fixed;left:-99999px;top:0;width:720px;background:linear-gradient(160deg,#cdebff,#eaf7ff);padding:26px;font-family:"ZCOOL KuaiLe","PingFang SC","Microsoft YaHei",sans-serif}
 </style>
 </head>
 <body>
+<div id="loading"><div class="spin"></div><div class="lt">加载中…</div></div>
 <div class="app">
 
   <div class="bar">
@@ -605,8 +612,16 @@ async function makeShot(){
 }
 document.getElementById('btnShot').onclick=makeShot;
 
-render();
-initWeather();
+// 先加载数据与小人图，全部就绪后再揭开（不闪）
+(async()=>{
+  try{ await initWeather(); }catch(e){}
+  // 兜底：万一天气失败没渲染，用当前 state 渲染一次
+  if(!document.getElementById('figure').children.length) render();
+  // 等当前小人图加载完，避免空白闪一下
+  const img=document.querySelector('#figure img.kid');
+  if(img && !img.complete){ await new Promise(res=>{ img.onload=img.onerror=res; setTimeout(res,3000); }); }
+  document.getElementById('loading').classList.add('hide');
+})();
 </script>
 </body>
 </html>
