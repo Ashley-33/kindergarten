@@ -14,7 +14,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
     --blue:#2f86d0; --blue-d:#1f6cb0; --blue-l:#e8f5ff; --chip:#4aa3e0;
@@ -620,9 +619,20 @@ function buildPoster(r){
     </div>
   </div>`;
 }
+// 按需加载截图库（只在点 📸 时才下载，不拖慢打开）
+function ensureH2C(){
+  return new Promise((resolve,reject)=>{
+    if(window.html2canvas) return resolve();
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=()=>resolve(); s.onerror=reject;
+    document.head.appendChild(s);
+  });
+}
 async function makeShot(){
   const st=document.getElementById('wStatus');
-  if(typeof html2canvas==='undefined'){ st.textContent='⚠️ 截图组件未加载（需联网）'; return; }
+  st.textContent='⏳ 正在准备图卡…';
+  try{ await ensureH2C(); }catch(_){ st.textContent='⚠️ 截图组件加载失败（需联网）'; return; }
   const r=recommend({...state,month:state.date.getMonth()+1});
   const host=document.getElementById('poster');
   host.innerHTML=buildPoster(r);
@@ -644,15 +654,25 @@ async function makeShot(){
 }
 document.getElementById('btnShot').onclick=makeShot;
 
-// 先加载数据与小人图，全部就绪后再揭开（不闪）
-(async()=>{
-  try{ await initWeather(); }catch(e){}
-  // 兜底：万一天气失败没渲染，用当前 state 渲染一次
-  if(!document.getElementById('figure').children.length) render();
-  // 等当前小人图加载完，避免空白闪一下
+// 等当前小人图就绪后揭开遮罩（小人图已被 SW 缓存，几乎瞬间）
+async function reveal(){
   const img=document.querySelector('#figure img.kid');
-  if(img && !img.complete){ await new Promise(res=>{ img.onload=img.onerror=res; setTimeout(res,3000); }); }
+  if(img && !img.complete){ await new Promise(res=>{ img.onload=img.onerror=res; setTimeout(res,2000); }); }
   document.getElementById('loading').classList.add('hide');
+}
+// 启动：有上次缓存就「先秒显示、后台静默刷新」；没有则正常加载
+(async()=>{
+  const cached=getCachedDays();
+  if(cached){
+    DAYS=cached.days; applyDay();                     // 用缓存立刻渲染
+    document.getElementById('wStatus').textContent='📦 '+cached.name+' · 刷新中…';
+    await reveal();                                    // 立刻揭开
+    initWeather();                                     // 后台静默拉最新（成功更新/失败保持缓存）
+  } else {
+    try{ await initWeather(); }catch(e){}
+    if(!document.getElementById('figure').children.length) render();
+    await reveal();
+  }
 })();
 
 // 注册 Service Worker（PWA：可添加到主屏幕、离线可看上次内容）
