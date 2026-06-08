@@ -131,6 +131,11 @@
   #loading .spin{width:40px;height:40px;border-radius:50%;border:4px solid #cfe6fb;border-top-color:var(--blue);animation:kgspin .8s linear infinite}
   #loading .lt{color:var(--blue-d);font-size:15px}
   @keyframes kgspin{to{transform:rotate(360deg)}}
+  .tipmodal{position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;background:rgba(40,70,100,.4);padding:24px}
+  .tipcard{background:#fff;border-radius:18px;padding:20px 22px;max-width:300px;box-shadow:var(--shadow);text-align:center}
+  .tiptitle{font-size:17px;color:var(--blue-d);margin-bottom:10px}
+  .tiptext{font-size:14px;color:var(--ink);line-height:1.7;margin-bottom:16px}
+  .tipbtn{background:var(--blue);color:#fff;border:none;border-radius:20px;padding:9px 24px;font-family:inherit;font-size:14px;cursor:pointer}
   #poster{position:fixed;left:-99999px;top:0;width:720px;background:linear-gradient(160deg,#cdebff,#eaf7ff);padding:26px;font-family:"ZCOOL KuaiLe","PingFang SC","Microsoft YaHei",sans-serif}
 </style>
 </head>
@@ -139,21 +144,20 @@
 <div class="app">
 
   <div class="bar">
-    <div class="barL">
-      <div class="brand" id="brand">幼儿园穿什么</div>
-      <select class="bodysel" id="bodySelect" aria-label="孩子体质">
-        <option value="cold">🥶 怕冷</option>
-        <option value="normal" selected>😊 标准</option>
-        <option value="hot">🥵 怕热</option>
-      </select>
-    </div>
+    <div class="brand" id="brand">幼儿园穿什么</div>
     <div class="acts">
       <button class="ico-btn" id="btnWeather" title="重新定位">🔄</button>
       <button class="ico-btn" id="btnShot" title="生成穿搭图卡">📸</button>
+      <button class="ico-btn" id="btnInstall" title="添加到主屏幕">📲</button>
     </div>
   </div>
 
   <div class="chips">
+    <select class="bodysel" id="bodySelect" aria-label="孩子体质">
+      <option value="cold">🥶 怕冷</option>
+      <option value="normal" selected>😊 标准</option>
+      <option value="hot">🥵 怕热</option>
+    </select>
     <button class="chip tap" id="dateChip" title="点击切换 今天/明天">📅 <b id="sDay">明天</b> <span id="sDate">—</span> <i id="sWeek"></i> <span class="swap">⇆</span></button>
     <span class="chip"><span id="sWeatherEmo">⛅</span> <b id="sWeatherName">—</b></span>
     <span class="chip">🌡️ <b><span id="sLow">–</span>~<span id="sHigh">–</span>℃</b></span>
@@ -172,6 +176,13 @@
   <div class="tips" id="tips"></div>
 
   <div class="wstatus" id="wStatus"></div>
+</div>
+<div id="installTip" class="tipmodal" hidden>
+  <div class="tipcard">
+    <div class="tiptitle">📲 添加到主屏幕</div>
+    <div class="tiptext" id="tipText"></div>
+    <button class="tipbtn" id="tipClose">知道了</button>
+  </div>
 </div>
 <div id="poster"></div>
 
@@ -643,6 +654,28 @@ document.getElementById('btnShot').onclick=makeShot;
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
+
+// 「添加到主屏幕」按钮
+(function(){
+  const btn=document.getElementById('btnInstall');
+  const tip=document.getElementById('installTip');
+  const tipText=document.getElementById('tipText');
+  // 已经是安装后的独立窗口 → 不需要再显示安装按钮
+  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ btn.style.display='none'; return; }
+  let dp=null;
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); dp=e; });
+  window.addEventListener('appinstalled', ()=>{ btn.style.display='none'; });
+  btn.onclick=async()=>{
+    if(dp){ dp.prompt(); try{ await dp.userChoice; }catch(e){} dp=null; return; }   // 安卓/Chrome：系统安装框
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+    tipText.innerHTML = ios
+      ? 'iPhone / iPad（Safari）：<br>点底部「分享」⬆️ → 选「添加到主屏幕」'
+      : '点浏览器右上「⋮」菜单 → <br>选「添加到主屏幕 / 安装应用」';
+    tip.hidden=false;
+  };
+  document.getElementById('tipClose').onclick=()=>{ tip.hidden=true; };
+  tip.onclick=(e)=>{ if(e.target===tip) tip.hidden=true; };
+})();
 </script>
 </body>
 </html>
