@@ -42,6 +42,15 @@
     width:40px;height:40px;border:none;background:transparent;box-shadow:none;padding:0;
     font-size:21px;cursor:pointer;transition:.15s;line-height:1;opacity:.85;
   }
+  /* 添加到主屏幕 横幅 */
+  .installbar{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:8px 8px 8px 10px;flex:none}
+  .installbar[hidden]{display:none}
+  .ib-icon{width:42px;height:42px;border-radius:11px;flex:none}
+  .ib-txt{flex:1;min-width:0}
+  .ib-t{font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ib-d{font-size:12px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ib-btn{flex:none;background:var(--blue);color:#fff;border:none;border-radius:18px;padding:8px 14px;font-family:inherit;font-size:13px;cursor:pointer}
+  .ib-close{flex:none;background:transparent;border:none;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer;padding:2px 4px}
   .ico-btn:active{transform:scale(.88)}
   .ico-btn:hover{opacity:1}
 
@@ -147,12 +156,22 @@
 <div id="loading"><div class="spin"></div><div class="lt">加载中…</div></div>
 <div class="app">
 
+  <div class="installbar" id="installBar" hidden>
+    <img src="icon-192.png" alt="" class="ib-icon">
+    <div class="ib-txt">
+      <div class="ib-t">把「幼儿园穿什么」添加到主屏幕</div>
+      <div class="ib-d">像 App 一样使用，一键直达</div>
+    </div>
+    <button class="ib-btn" id="ibAction">查看方法</button>
+    <button class="ib-close" id="ibClose" aria-label="关闭">×</button>
+  </div>
+
   <div class="bar">
     <div class="brand" id="brand">幼儿园穿什么</div>
     <div class="acts">
+      <button class="ico-btn" id="btnShare" title="分享给朋友">📤</button>
       <button class="ico-btn" id="btnWeather" title="重新定位">🔄</button>
       <button class="ico-btn" id="btnShot" title="生成穿搭图卡">📸</button>
-      <button class="ico-btn" id="btnInstall" title="添加到主屏幕">📲</button>
     </div>
   </div>
 
@@ -680,17 +699,30 @@ if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
 
-// 「添加到主屏幕」按钮
+// 分享按钮 + 「添加到主屏幕」横幅
 (function(){
-  const btn=document.getElementById('btnInstall');
   const tip=document.getElementById('installTip');
   const tipText=document.getElementById('tipText');
-  // 已经是安装后的独立窗口 → 不需要再显示安装按钮
-  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ btn.style.display='none'; return; }
+  document.getElementById('tipClose').onclick=()=>{ tip.hidden=true; };
+  tip.onclick=(e)=>{ if(e.target===tip) tip.hidden=true; };
+
+  // 📤 分享：系统分享面板 / 复制链接兜底
+  document.getElementById('btnShare').onclick=async()=>{
+    const data={title:'幼儿园穿什么', text:'按天气看娃明天穿什么，挺好用的～', url:location.href};
+    if(navigator.share){ try{ await navigator.share(data); }catch(e){} return; }
+    try{ await navigator.clipboard.writeText(location.href); document.getElementById('wStatus').textContent='🔗 链接已复制，发给朋友吧'; }
+    catch(e){ document.getElementById('wStatus').textContent='链接：'+location.href; }
+  };
+
+  // 「添加到主屏幕」横幅（未安装 & 未关闭过才显示）
+  const bar=document.getElementById('installBar');
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  let dismissed=false; try{ dismissed = localStorage.getItem('kg_install_dismiss')==='1'; }catch(e){}
   let dp=null;
   window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); dp=e; });
-  window.addEventListener('appinstalled', ()=>{ btn.style.display='none'; });
-  btn.onclick=async()=>{
+  window.addEventListener('appinstalled', ()=>{ bar.hidden=true; });
+  if(!standalone && !dismissed) bar.hidden=false;
+  document.getElementById('ibAction').onclick=async()=>{
     if(dp){ dp.prompt(); try{ await dp.userChoice; }catch(e){} dp=null; return; }   // 安卓/Chrome：系统安装框
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
     tipText.innerHTML = ios
@@ -698,8 +730,7 @@ if('serviceWorker' in navigator){
       : '点浏览器右上「⋮」菜单 → <br>选「添加到主屏幕 / 安装应用」';
     tip.hidden=false;
   };
-  document.getElementById('tipClose').onclick=()=>{ tip.hidden=true; };
-  tip.onclick=(e)=>{ if(e.target===tip) tip.hidden=true; };
+  document.getElementById('ibClose').onclick=()=>{ bar.hidden=true; try{ localStorage.setItem('kg_install_dismiss','1'); }catch(e){} };
 })();
 </script>
 </body>
