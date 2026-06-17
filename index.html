@@ -492,7 +492,16 @@ function render(){
   document.getElementById('sHigh').textContent=state.high;
   document.getElementById('sVerdict').textContent=r.name;
 
-  document.getElementById('figure').innerHTML=figureHTML(r);
+  // 智能更新小人：造型没变就不动 img（避免刷新时整张重建导致的闪屏）
+  const figEl=document.getElementById('figure');
+  if(USE_IMAGES){
+    const src='assets/'+lookKey(r.tier, state.weather)+'.webp';
+    let img=figEl.querySelector('img.kid');
+    if(!img){ figEl.innerHTML='<img class="kid" alt="">'; img=figEl.querySelector('img.kid'); }
+    if(img.getAttribute('src')!==src){ img.alt=r.name; img.src=src; }   // 仅造型变化时换图
+  } else {
+    figEl.innerHTML=fig(r.svg);
+  }
 
   const top=r.topList.map(x=>`${x.k}：${x.v}`).join('<br>');
   let oh='';
